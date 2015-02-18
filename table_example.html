@@ -21,7 +21,7 @@
       };
 
       var originalJson = [];
-      d3.json("data/countries_1995_2012.json", function(error, data){
+      d3.json("data/countries_2012.json", function(error, data){
           originalJson = data;
           init();
           buildTable(defaultColumns, data);

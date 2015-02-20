@@ -21,7 +21,7 @@
       };
 
       var originalJson = [];
-      d3.json("data/countries_2012.json", function(error, data){
+      d3.json("data/countries_1995_2012.json", function(error, data){
           originalJson = data;
           init();
           buildTable(defaultColumns, data);
@@ -102,13 +102,27 @@
           });
 
         var rows = tbody.selectAll("tr.row")
-            .data(data)
+            .data(function(){ // create an object for each element in the years array
+              var yearLevelRows = [];
+              data.forEach(function(country){ // each country object
+                country.years.forEach(function(year){ //each country-year object
+                  yearLevelRows.push({
+                    "name": country.name,
+                    "continent": country.continent,
+                    "gdp": year.gdp,
+                    "life_expectancy": year.life_expectancy,
+                    "population": year.population,
+                    "year": year.year
+                  });
+                });
+              });
+              return yearLevelRows;
+            })
             .enter()
             .append("tr").attr("class", "row");
 
         var cells = rows.selectAll("td")
-          .data(function(row) {
-
+          .data(function(row) { // row is referring to the object that is already bound to the selection
               return d3.range(columns.length).map(function(d, i){
                 // FORMATTING NUMBERS
                 if (columns[i] == "life_expectancy")

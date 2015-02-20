@@ -37,11 +37,11 @@
         return yearLevelRows;
       };
 
-      var originalJson = [];
+      var tableData = [];
       d3.json("data/countries_1995_2012.json", function(error, data){
-          originalJson = prepareData(data);
+          tableData = prepareData(data);
           init();
-          buildTable(defaultColumns, originalJson);
+          buildTable(defaultColumns, tableData);
       });
 
       var filterByContinent = function() {
@@ -53,15 +53,15 @@
         });
 
         if (continents.length != 0) { //show filtered data only if a checkbox is selected
-          var filteredJSON = [];
-          originalJson.forEach(function(elm){
+          var filteredData = [];
+          tableData.forEach(function(elm){
             if (continents.indexOf(elm.continent) != -1) // if elm.continent is one of the selected continents
-              filteredJSON.push(elm);
+              filteredData.push(elm);
           });
-          buildTable(defaultColumns, filteredJSON);
+          buildTable(defaultColumns, filteredData);
         }
         else  {
-          buildTable(defaultColumns, originalJson); // If no checkbox is selected, show all data
+          buildTable(defaultColumns, tableData); // If no checkbox is selected, show all data
         }
       };
 
@@ -84,7 +84,7 @@
                 continent: leaves[0].continent
               };
             })
-            .map(originalJson, d3.map); // This is IMPORTANT. Because of this, I can directly use map.values()
+            .map(tableData, d3.map); // This is IMPORTANT. Because of this, I can directly use map.values()
 
           buildTable(defaultColumns, aggregatedRows.values());
         };
@@ -129,15 +129,15 @@
               return d3.range(columns.length).map(function(d, i){
                 // FORMATTING NUMBERS
                 if (columns[i] == "life_expectancy")
-                  return d3.round(row["life_expectancy"],1);
+                  return d3.round(row[columns[i]],1);
 
                 if (columns[i] == "population") {
                   var format = d3.format(",");
-                  return format(row["population"]);
+                  return format(row[columns[i]]);
                 }
 
                 if (columns[i] == "gdp") {
-                  return d3.format("4.1s")(row["gdp"]);
+                  return d3.format("4.1s")(row[columns[i]]);
                 }
 
                 return row[columns[i]];

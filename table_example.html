@@ -71,8 +71,8 @@
         }
         else {
           var aggregatedRows = d3.nest()
-            .key(function(d){ return d[aggregateBy]; })
-            // .key(function(d){ return d["year"]; }) //secondary grouping on year
+            .key(function(d){ return d[aggregateBy]; }) // group by continent
+            .key(function(d){ return d["year"]; }) //secondary grouping on year
             .rollup(function(leaves, i){
               return {
                 // name, continent, gdp, life_expectancy, population, year
@@ -86,7 +86,11 @@
             })
             .map(tableData, d3.map); // This is IMPORTANT. Because of this, I can directly use map.values()
 
-          buildTable(defaultColumns, aggregatedRows.values());
+            var finalRows = [];
+            aggregatedRows.values().forEach(function(d){
+              finalRows = finalRows.concat(d.values());
+            });
+          buildTable(defaultColumns, finalRows);
         };
       };
 

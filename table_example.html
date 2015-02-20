@@ -20,11 +20,28 @@
           .html("World Countries Ranking");
       };
 
+      var prepareData = function(rawData){
+        var yearLevelRows = [];
+        rawData.forEach(function(country){ // each country object
+          country.years.forEach(function(year){ //each country-year object
+            yearLevelRows.push({
+              "name": country.name,
+              "continent": country.continent,
+              "gdp": year.gdp,
+              "life_expectancy": year.life_expectancy,
+              "population": year.population,
+              "year": year.year
+            });
+          });
+        });
+        return yearLevelRows;
+      };
+
       var originalJson = [];
       d3.json("data/countries_1995_2012.json", function(error, data){
-          originalJson = data;
+          originalJson = prepareData(data);
           init();
-          buildTable(defaultColumns, data);
+          buildTable(defaultColumns, originalJson);
       });
 
       var filterByContinent = function() {
@@ -55,6 +72,7 @@
         else {
           var aggregatedRows = d3.nest()
             .key(function(d){ return d[aggregateBy]; })
+            // .key(function(d){ return d["year"]; }) //secondary grouping on year
             .rollup(function(leaves, i){
               return {
                 // name, continent, gdp, life_expectancy, population, year
@@ -102,22 +120,7 @@
           });
 
         var rows = tbody.selectAll("tr.row")
-            .data(function(){ // create an object for each element in the years array
-              var yearLevelRows = [];
-              data.forEach(function(country){ // each country object
-                country.years.forEach(function(year){ //each country-year object
-                  yearLevelRows.push({
-                    "name": country.name,
-                    "continent": country.continent,
-                    "gdp": year.gdp,
-                    "life_expectancy": year.life_expectancy,
-                    "population": year.population,
-                    "year": year.year
-                  });
-                });
-              });
-              return yearLevelRows;
-            })
+            .data(data)
             .enter()
             .append("tr").attr("class", "row");
 

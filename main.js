@@ -157,37 +157,53 @@ var buildTable = function (columns, data){
 
   buildChart(data);
 };
+
 var buildChart = function(data, field){
+
   field = "life_expectancy"  ;
-  var width = 400,
-      height = 500,
-      barHeight = 10;
+  // var width = 400,
+  //     height = 500,
+  //     barHeight = 10;
+
+  var margin = { top: 10, right: 10, bottom: 10, left: 10 },
+      width = 960 - margin.left - margin.right,
+      height = 640 - margin.top - margin.bottom;
 
   var min = d3.min(data, function(d){  return d[field]; });
   var max = d3.max(data, function(d){  return d[field]; });
-  console.log(max);
+  // console.log(max);
 
   var x = d3.scale.linear()
-      .domain([min, max])
+      .domain([0, max])
       .range([0, width]);
 
+  var y = d3.scale.ordinal()
+      .domain(data.map(function(d){ return d["name"]; }))
+      .rangeRoundBands([0, height]);
+
   var chart = d3.select("svg")
-      .attr("width", width)
-      .attr("height", data.length * barHeight);
+     .attr('width', width + margin.left + margin.right)
+      .attr('height', height + margin.top + margin.bottom)
+    .append('g')
+      .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+      // .attr("width", width)
+      // .attr("height", data.length * barHeight);
 
   var bar = chart.selectAll("g")
       .data(data)
     .enter()
       .append("g")
-      .attr("transform", function(d ,i){  return "translate(0, "+ i*barHeight + ")"});
+      // .attr("transform", function(d ,i){  return "translate(0, "+ i*barHeight + ")"});
 
   bar.append("rect")
       .attr("width", function(d){ return x(d[field]); })
-      .attr("height", barHeight - 1);
+      .attr("height", y.rangeBand() - 1)
+      .attr("x", x(min))
+      .attr("y", function(d){ return y(d[field]); });
 
   bar.append("text")
       .attr("x", function(d){ return x(d[field]) + 5; })
-      .attr("y", barHeight/2)
+      .attr("y", y.rangeBand()/2)
       .text(function(d){  return d3.round(d[field], 1);  }); //Rounding format applied here
 
 };

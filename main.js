@@ -28,7 +28,9 @@ var tableData = [];
 d3.json("data/countries_1995_2012.json", function(error, data){
     tableData = prepareData(data);
     init();
-    buildTable(defaultColumns, tableData);
+    var initialYearValue = Number(d3.select("#slider-time").node().value);
+    filterByYear(initialYearValue);
+    // buildTable(defaultColumns, tableData);
 });
 
 var applyFilter = function(filterValues, filterOn) {
@@ -155,12 +157,12 @@ var buildTable = function (columns, data){
         return d;
       });
 
-  buildChart(data);
+  // buildChart(data);
 };
 
 var buildChart = function(data, field){
 
-  field = "life_expectancy"  ;
+  // field = "life_expectancy"  ;
   // var width = 400,
   //     height = 500,
   //     barHeight = 10;

@@ -11,36 +11,36 @@
     <script src="http://d3js.org/d3.v3.min.js"></script>
     <script src="./main.js"></script>
 
-    <input type="range" name="points" min="1995" max="2012" step="1" value="1995" id="slider-time" oninput="filterByYear(Number(value))">
+    <input type="range" name="points" min="1995" max="2012" step="1" value="1995" id="slider-time" oninput="updateData();">
     <br>
     <label>Americas
-      <input type="checkbox" name="Americas" value="Americas" title="Americas" onchange="filterByContinent();">
+      <input type="checkbox" name="Americas" value="Americas" title="Americas" onchange="updateData();">
       </input>
     </label>
     <label>Africa
-      <input type="checkbox" name="Africa" value="Africa" title="Africa" onchange="filterByContinent();">
+      <input type="checkbox" name="Africa" value="Africa" title="Africa" onchange="updateData();">
       </input>
     </label>
     <label>Asia
-      <input type="checkbox" name="Asia" value="Asia" title="Asia" onchange="filterByContinent();">
+      <input type="checkbox" name="Asia" value="Asia" title="Asia" onchange="updateData();">
       </input>
     </label>
     <label>Europe
-      <input type="checkbox" name="Europe" value="Europe" title="Europe" onchange="filterByContinent();">
+      <input type="checkbox" name="Europe" value="Europe" title="Europe" onchange="updateData();">
       </input>
     </label>
     <label>Oceania
-      <input type="checkbox" name="Oceania" value="Oceania" title="Oceania" onchange="filterByContinent();">
+      <input type="checkbox" name="Oceania" value="Oceania" title="Oceania" onchange="updateData();">
       </input>
     </label>
     <br>
     Aggregation:
     <label>None
-      <input type="radio" class="aggregation" name="None" value="None" onclick="doAggregation();" checked>
+      <input type="radio" id="radio-no-aggr" name="None" value="" onclick="updateData();" checked>
       </input>
     </label>
     <label>by Continent
-      <input type="radio" class="aggregation" name="None" value="None" onclick="doAggregation('continent');">
+      <input type="radio" id="radio-continent" name="None" value="" onclick="updateData();">
       </input>
     </label>
     <br>

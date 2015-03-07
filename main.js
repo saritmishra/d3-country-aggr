@@ -1,11 +1,4 @@
 var defaultColumns = ["name", "continent", "gdp", "life_expectancy", "population", "year"];
-var init = function(){
-  var table = d3.select("body").append("table");
-  table.append("thead").attr("class", "thead").append("tr");
-  table.append("tbody");
-  table.append("caption")
-    .html("World Countries Ranking");
-};
 
 var prepareData = function(rawData){
   var yearLevelRows = [];
@@ -24,25 +17,46 @@ var prepareData = function(rawData){
   return yearLevelRows;
 };
 
+var init = function(){
+  var table = d3.select("body").append("table");
+  table.append("thead").attr("class", "thead").append("tr");
+  table.append("tbody");
+  table.append("caption")
+    .html("World Countries Ranking");
+};
+
+var updateData = function() {
+  // 1. Filter based on time-slider
+  // 2. Filter based on continent selection
+  // 3. Check aggregation setting and update
+
+  var yearSelection = Number(d3.select("#slider-time").node().value);
+  var aggregateBy = d3.select("#radio-continent").node().checked ? "continent" : null;
+  var x = filterByYear(tableData, yearSelection);
+  var y = filterByContinent(x);
+  var z = doAggregation(y, aggregateBy);
+
+  buildTable(defaultColumns, z);
+
+};
+
 var tableData = [];
 d3.json("data/countries_1995_2012.json", function(error, data){
     tableData = prepareData(data);
     init();
-    var initialYearValue = Number(d3.select("#slider-time").node().value);
-    filterByYear(initialYearValue);
-    // buildTable(defaultColumns, tableData);
+    updateData();
 });
 
-var applyFilter = function(filterValues, filterOn) {
+var applyFilter = function(data, filterValues, filterOn) {
   var filteredData = [];
-  tableData.forEach(function(elm){
+  data.forEach(function(elm){
     if (filterValues.indexOf(elm[filterOn]) != -1) // if elm[filterOn] is one of the selected values
       filteredData.push(elm);
   });
   return filteredData;
 };
 
-var filterByContinent = function() {
+var filterByContinent = function(data) {
   var continents = [];
   d3.selectAll("input").each(function(d) { //Find all the selected continents
     if(d3.select(this).attr("type") == "checkbox" && d3.select(this).node().checked) {
@@ -51,22 +65,22 @@ var filterByContinent = function() {
   });
 
   if (continents.length != 0) { //show filtered data only if a checkbox is selected
-    var filteredData = applyFilter(continents, "continent");
-    buildTable(defaultColumns, filteredData);
+    var filteredData = applyFilter(data, continents, "continent");
+    return filteredData;
   }
   else  {// If no checkbox is selected, show all data
-    buildTable(defaultColumns, tableData);
+    return data;
   }
 };
 
-var filterByYear = function(year) {
-  var filteredData = applyFilter([year], "year");
-  buildTable(defaultColumns, filteredData);
+var filterByYear = function(data, year) {
+  var filteredData = applyFilter(data, [year], "year");
+  return filteredData;
 };
 
-var doAggregation = function(aggregateBy){
+var doAggregation = function(data, aggregateBy){
   if (!aggregateBy) {
-    filterByContinent();
+    return filterByContinent(data);
   }
   else {
     var aggregatedRows = d3.nest()
@@ -83,13 +97,13 @@ var doAggregation = function(aggregateBy){
           continent: leaves[0].continent
         };
       })
-      .map(tableData, d3.map); // This is IMPORTANT. Because of this, I can directly use map.values()
+      .map(data, d3.map); // This is IMPORTANT. Because of this, I can directly use map.values()
 
       var finalRows = [];
       aggregatedRows.values().forEach(function(d){
         finalRows = finalRows.concat(d.values());
       });
-    buildTable(defaultColumns, finalRows);
+      return finalRows;
   };
 };
 
@@ -145,9 +159,6 @@ var buildTable = function (columns, data){
 
           return row[columns[i]];
         });
-        // return d3.range(Object.keys(row).length).map(function(column, i) {
-        //     return row[Object.keys(row)[i]];
-        // });
     });
 
   cells
@@ -156,16 +167,9 @@ var buildTable = function (columns, data){
       .text(function(d) {
         return d;
       });
-
-  // buildChart(data);
 };
 
 var buildChart = function(data, field){
-
-  // field = "life_expectancy"  ;
-  // var width = 400,
-  //     height = 500,
-  //     barHeight = 10;
 
   var margin = { top: 10, right: 10, bottom: 10, left: 10 },
       width = 960 - margin.left - margin.right,
@@ -173,7 +177,6 @@ var buildChart = function(data, field){
 
   var min = d3.min(data, function(d){  return d[field]; });
   var max = d3.max(data, function(d){  return d[field]; });
-  // console.log(max);
 
   var x = d3.scale.linear()
       .domain([0, max])
@@ -188,14 +191,11 @@ var buildChart = function(data, field){
       .attr('height', height + margin.top + margin.bottom)
     .append('g')
       .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
-      // .attr("width", width)
-      // .attr("height", data.length * barHeight);
 
   var bar = chart.selectAll("g")
       .data(data)
     .enter()
       .append("g")
-      // .attr("transform", function(d ,i){  return "translate(0, "+ i*barHeight + ")"});
 
   bar.append("rect")
       .attr("width", function(d){ return x(d[field]); })
@@ -207,5 +207,4 @@ var buildChart = function(data, field){
       .attr("x", function(d){ return x(d[field]) + 5; })
       .attr("y", y.rangeBand()/2)
       .text(function(d){  return d3.round(d[field], 1);  }); //Rounding format applied here
-
 };

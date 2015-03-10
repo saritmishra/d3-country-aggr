@@ -37,6 +37,7 @@ var updateData = function() {
   var z = doAggregation(y, aggregateBy);
 
   buildTable(defaultColumns, z);
+  buildChart(z, "gdp");
 
 };
 
@@ -171,9 +172,9 @@ var buildTable = function (columns, data){
 
 var buildChart = function(data, field){
 
-  var margin = { top: 10, right: 10, bottom: 10, left: 10 },
-      width = 960 - margin.left - margin.right,
-      height = 640 - margin.top - margin.bottom;
+  var margin = { top: 10, right: 10, bottom: 20, left: 50 },
+      width = 800 - margin.left - margin.right,
+      height = 500 - margin.top - margin.bottom;
 
   var min = d3.min(data, function(d){  return d[field]; });
   var max = d3.max(data, function(d){  return d[field]; });
@@ -185,9 +186,12 @@ var buildChart = function(data, field){
   var y = d3.scale.ordinal()
       .domain(data.map(function(d){ return d["name"]; }))
       .rangeRoundBands([0, height]);
+  // console.log (y.domain());
+
+  d3.select("svg").selectAll("g").remove();
 
   var chart = d3.select("svg")
-     .attr('width', width + margin.left + margin.right)
+      .attr('width', width + margin.left + margin.right)
       .attr('height', height + margin.top + margin.bottom)
     .append('g')
       .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
@@ -200,11 +204,29 @@ var buildChart = function(data, field){
   bar.append("rect")
       .attr("width", function(d){ return x(d[field]); })
       .attr("height", y.rangeBand() - 1)
-      .attr("x", x(min))
-      .attr("y", function(d){ return y(d[field]); });
+      .attr("x", 0)
+      .attr("y", function(d){ return y(d["name"]); });
 
   bar.append("text")
       .attr("x", function(d){ return x(d[field]) + 5; })
-      .attr("y", y.rangeBand()/2)
+      .attr("y", function(d){ return y(d["name"]) + y.rangeBand()/2 })
       .text(function(d){  return d3.round(d[field], 1);  }); //Rounding format applied here
+
+  var xAxis = d3.svg.axis()
+      .scale(x)
+      .orient("bottom");
+
+  var yAxis = d3.svg.axis()
+      .scale(y)
+      .orient("left");
+
+  chart.append("g")
+      .attr("class", "axis")
+      .attr("transform", "translate(0," + height + ")")
+      .call(xAxis);
+  chart.append("g")
+      .attr("class", "axis")
+      // .attr("transform", "translate(0," + height + ")")
+      .call(yAxis);
+
 };
